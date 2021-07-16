@@ -1,0 +1,45 @@
+server:
+  port: 8888
+  host: 0.0.0.0
+  features:
+    print-details: true
+
+tracing:
+  service: jdbc-db
+
+# see README.md for details how to run databases in docker
+db:
+  source: jdbc
+  connection:
+    #
+    # Postgresql configuration
+    #
+    url: jdbc:postgresql://localhost:5432/helidontest
+    username: postgres
+    password: i
+    poolName: hikariPool
+    initializationFailTimeout: -1
+    connectionTimeout: 2000
+    helidon:
+      pool-metrics:
+        enabled: true
+        # name prefix defaults to "db.pool." - if you have more than one client within a JVM, you may want to distinguish between them
+        name-prefix: "hikari."
+  services:
+    tracing:
+      - enabled: true
+    metrics:
+      - type: METER
+  health-check:
+    type: "query"
+    statementName: "health-check"
+  statements:
+    health-check: "SELECT 1 FROM DUAL"
+    create-users: "CREATE TABLE IF NOT EXISTS Users (id INTEGER NOT NULL PRIMARY KEY, username VARCHAR(64) NOT NULL, password VARCHAR(64) NOT NULL, role VARCHAR(64) NOT NULL)"
+    select-all-users: "SELECT * FROM Users"
+    select-users-by-id: "SELECT * FROM Users WHERE id = :id"
+    login-users: "SELECT * FROM Users WHERE username = :username AND password = :password"
+    insert-users: "INSERT INTO Users(id, username, password, role) VALUES(?, ?, ?, ?)"
+    update-users-by-id: "UPDATE Users SET username = :username, password = :password WHERE id = :id"
+    delete-users-by-id: "DELETE FROM Users WHERE id = :id"
+    delete-all-users: "DELETE FROM Users"
